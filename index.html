@@ -1,147 +1,600 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mons Ultra Trail — Dashboard Instagram</title>
-<style>
-  body { font-family: Arial, sans-serif; background: #0d1117; color: #e6edf3; margin: 0; padding: 20px; }
-  h1 { color: #f97316; } h2 { color: #fb923c; border-bottom: 1px solid #30363d; padding-bottom: 8px; }
-  .stats { display: flex; gap: 20px; flex-wrap: wrap; margin: 20px 0; }
-  .stat { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; min-width: 140px; text-align: center; }
-  .stat .val { font-size: 2em; font-weight: bold; color: #f97316; }
-  .stat .lbl { font-size: 0.85em; color: #8b949e; }
-  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 16px; }
-  .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
-  .card-type { font-size: 0.75em; background: #f97316; color: #000; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
-  .caption { font-size: 0.88em; color: #8b949e; }
-  .metrics { display: flex; gap: 12px; flex-wrap: wrap; margin: 8px 0; font-size: 0.9em; }
-  .card a { color: #f97316; font-size: 0.85em; }
-  ul.sug { line-height: 2; }
-  .footer { color: #8b949e; font-size: 0.8em; margin-top: 40px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mons Ultra Trail — Dashboard Instagram</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #764ba2;
+            font-size: 2.5em;
+            margin-bottom: 8px;
+        }
+        
+        .meta {
+            color: #999;
+            font-size: 0.95em;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .stat {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .stat:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .chart-card h2 {
+            color: #764ba2;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .posts {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-top: 30px;
+        }
+        
+        .posts h2 {
+            color: #764ba2;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .post {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background: #f9f9f9;
+            transition: all 0.3s;
+        }
+        
+        .post:hover {
+            background: #f0f0f0;
+            border-color: #667eea;
+        }
+        
+        .post-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .post-type {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            width: fit-content;
+        }
+        
+        .post-caption {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        
+        .post-metrics {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9em;
+            color: #999;
+            flex-wrap: wrap;
+        }
+        
+        .metric {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .metric-value {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .post-link {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            text-align: center;
+            transition: background 0.3s;
+            font-size: 0.9em;
+        }
+        
+        .post-link:hover {
+            background: #764ba2;
+        }
+        
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            padding: 20px;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        @media (max-width: 768px) {
+            .charts {
+                grid-template-columns: 1fr;
+            }
+            
+            .post {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
 </head>
 <body>
-<h1>🏔️ Mons Ultra Trail — Dashboard Instagram</h1>
-<p style="color:#8b949e">Atualizado: 2026-06-23 16:08</p>
-<h2>📊 Métricas da Conta</h2>
-<div class="stats">
-  <div class="stat"><div class="val">42,225</div><div class="lbl">Seguidores</div></div>
-  <div class="stat"><div class="val">1133</div><div class="lbl">Posts</div></div>
-</div>
-<h2>🏆 Top Posts por Engajamento</h2>
-<div class="cards">
-        <div class="card">
-          <div class="card-type">CAROUSEL_ALBUM</div>
-          <p class="caption">🇧🇷 Hoje não há palavras suficientes, apenas um sentimento profundo de ausência. Que a memória de voc…</p>
-          <div class="metrics">
-            <span>❤️ 4221</span>
-            <span>💬 143</span>
-            <span>🔖 0</span>
-            <span>👁️ 0</span>
-          </div>
-          <a href="#" target="_blank">Ver post →</a>
+    <div class="container">
+        <header>
+            <h1>🏔️ Mons Ultra Trail</h1>
+            <p class="meta">Dashboard Instagram — Atualizado em 2026-06-23 16:08</p>
+            
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value">42,225</div>
+                    <div class="stat-label">👥 Seguidores</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">1133</div>
+                    <div class="stat-label">📸 Posts Totais</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">10,552</div>
+                    <div class="stat-label">❤️ Likes (Top 10)</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">508</div>
+                    <div class="stat-label">💬 Comentários</div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="charts">
+            <div class="chart-card">
+                <h2>📊 Tipo de Posts</h2>
+                <canvas id="typesChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h2>❤️ Engajamento por Post</h2>
+                <canvas id="engagementChart"></canvas>
+            </div>
         </div>
-        <div class="card">
-          <div class="card-type">CAROUSEL_ALBUM</div>
-          <p class="caption">🇧🇷 Você vai perceber que a parte mais difícil nem é a subida, nem a descida, nem o frio, nem a lama,…</p>
-          <div class="metrics">
-            <span>❤️ 1345</span>
-            <span>💬 42</span>
-            <span>🔖 0</span>
-            <span>👁️ 0</span>
-          </div>
-          <a href="#" target="_blank">Ver post →</a>
+        
+        <div class="posts">
+            <h2>🏆 Top 10 Posts por Engajamento</h2>
+
+            <div class="post">
+                <div class="post-info">
+                    <div>
+                        <span class="post-type">CAROUSEL_ALBUM</span>
+                        <p class="post-caption">🇧🇷 Hoje não há palavras suficientes, apenas um sentimento profundo de ausência. Que a memória de vocês siga cruzando cada linha de chegada conosco, le...</p>
+                    </div>
+                    <div class="post-metrics">
+                        <div class="metric">
+                            <span>❤️</span>
+                            <span class="metric-value">4221</span>
+                        </div>
+                        <div class="metric">
+                            <span>💬</span>
+                            <span class="metric-value">143</span>
+                        </div>
+                        <div class="metric">
+                            <span>⚡</span>
+                            <span class="metric-value">4507</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <a href="#" target="_blank" class="post-link">Ver no Instagram →</a>
+                </div>
+            </div>
+
+            <div class="post">
+                <div class="post-info">
+                    <div>
+                        <span class="post-type">CAROUSEL_ALBUM</span>
+                        <p class="post-caption">🇧🇷 Você vai perceber que a parte mais difícil nem é a subida, nem a descida, nem o frio, nem a lama, é quando o cérebro começa a usar o seu próprio vo...</p>
+                    </div>
+                    <div class="post-metrics">
+                        <div class="metric">
+                            <span>❤️</span>
+                            <span class="metric-value">1345</span>
+                        </div>
+                        <div class="metric">
+                            <span>💬</span>
+                            <span class="metric-value">42</span>
+                        </div>
+                        <div class="metric">
+                            <span>⚡</span>
+                            <span class="metric-value">1429</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <a href="#" target="_blank" class="post-link">Ver no Instagram →</a>
+                </div>
+            </div>
+
+            <div class="post">
+                <div class="post-info">
+                    <div>
+                        <span class="post-type">CAROUSEL_ALBUM</span>
+                        <p class="post-caption">Santa Catarina acaba de ganhar dois grandes movimentos para quem ama correr!
+
+🏃‍♂️🔥 Vem ai o Circuito Catarinense 2026 de Corridas de Rua
+e o Trail Ru...</p>
+                    </div>
+                    <div class="post-metrics">
+                        <div class="metric">
+                            <span>❤️</span>
+                            <span class="metric-value">1173</span>
+                        </div>
+                        <div class="metric">
+                            <span>💬</span>
+                            <span class="metric-value">37</span>
+                        </div>
+                        <div class="metric">
+                            <span>⚡</span>
+                            <span class="metric-value">1247</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <a href="#" target="_blank" class="post-link">Ver no Instagram →</a>
+                </div>
+            </div>
+
+            <div class="post">
+                <div class="post-info">
+                    <div>
+                        <span class="post-type">CAROUSEL_ALBUM</span>
+                        <p class="post-caption">🇺🇸 Save the date for the biggest challenge of the year.
+
+Set aside your legs and your mind for November, because in 2026 we will once again host the O...</p>
+                    </div>
+                    <div class="post-metrics">
+                        <div class="metric">
+                            <span>❤️</span>
+                            <span class="metric-value">771</span>
+                        </div>
+                        <div class="metric">
+                            <span>💬</span>
+                            <span class="metric-value">54</span>
+                        </div>
+                        <div class="metric">
+                            <span>⚡</span>
+                            <span class="metric-value">879</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <a href="#" target="_blank" class="post-link">Ver no Instagram →</a>
+                </div>
+            </div>
+
+            <div class="post">
+                <div class="post-info">
+                    <div>
+                        <span class="post-type">CAROUSEL_ALBUM</span>
+                        <p class="post-caption">🇧🇷 Uma subida raramente te quebra pela inclinação, ela te quebra pela história que você conta enquanto está ali, a corrida é real, o esforço é real, m...</p>
+                    </div>
+                    <div class="post-metrics">
+                        <div class="metric">
+                            <span>❤️</span>
+                            <span class="metric-value">769</span>
+                        </div>
+                        <div class="metric">
+                            <span>💬</span>
+                            <span class="metric-value">32</span>
+                        </div>
+                        <div class="metric">
+                            <span>⚡</span>
+                            <span class="metric-value">833</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <a href="#" target="_blank" class="post-link">Ver no Instagram →</a>
+                </div>
+            </div>
+
+            <div class="post">
+                <div class="post-info">
+                    <div>
+                        <span class="post-type">CAROUSEL_ALBUM</span>
+                        <p class="post-caption">🇧🇷 INSCRIÇÕES ABERTAS com promo de verdade na Sicoob Mons Ultra Trail — A Grand Final do @onehundredworldchamp 2026!
+
+Pelo segundo ano consecutivo, No...</p>
+                    </div>
+                    <div class="post-metrics">
+                        <div class="metric">
+                            <span>❤️</span>
+                            <span class="metric-value">499</span>
+                        </div>
+                        <div class="metric">
+                            <span>💬</span>
+                            <span class="metric-value">71</span>
+                        </div>
+                        <div class="metric">
+                            <span>⚡</span>
+                            <span class="metric-value">641</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <a href="#" target="_blank" class="post-link">Ver no Instagram →</a>
+                </div>
+            </div>
+
+            <div class="post">
+                <div class="post-info">
+                    <div>
+                        <span class="post-type">CAROUSEL_ALBUM</span>
+                        <p class="post-caption">🇧🇷 Existem pessoas que nos ensinam sobre força sem precisar levantar a voz. Mães fazem isso o tempo inteiro. Ensinaram sobre seguir em frente mesmo ca...</p>
+                    </div>
+                    <div class="post-metrics">
+                        <div class="metric">
+                            <span>❤️</span>
+                            <span class="metric-value">528</span>
+                        </div>
+                        <div class="metric">
+                            <span>💬</span>
+                            <span class="metric-value">27</span>
+                        </div>
+                        <div class="metric">
+                            <span>⚡</span>
+                            <span class="metric-value">582</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <a href="#" target="_blank" class="post-link">Ver no Instagram →</a>
+                </div>
+            </div>
+
+            <div class="post">
+                <div class="post-info">
+                    <div>
+                        <span class="post-type">VIDEO</span>
+                        <p class="post-caption">🇧🇷 É hora de reviver tudo o que vivemos na grande final.
+
+É emoção à flor da pele, é o resgate de tudo o que foi vencido, aprendido e eternizado em no...</p>
+                    </div>
+                    <div class="post-metrics">
+                        <div class="metric">
+                            <span>❤️</span>
+                            <span class="metric-value">426</span>
+                        </div>
+                        <div class="metric">
+                            <span>💬</span>
+                            <span class="metric-value">38</span>
+                        </div>
+                        <div class="metric">
+                            <span>⚡</span>
+                            <span class="metric-value">502</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <a href="#" target="_blank" class="post-link">Ver no Instagram →</a>
+                </div>
+            </div>
+
+            <div class="post">
+                <div class="post-info">
+                    <div>
+                        <span class="post-type">VIDEO</span>
+                        <p class="post-caption">🇧🇷 Toda história que será lembrada em novembro começou muito antes da largada. Começou no instante em que alguém decidiu sair do campo das possibilida...</p>
+                    </div>
+                    <div class="post-metrics">
+                        <div class="metric">
+                            <span>❤️</span>
+                            <span class="metric-value">362</span>
+                        </div>
+                        <div class="metric">
+                            <span>💬</span>
+                            <span class="metric-value">57</span>
+                        </div>
+                        <div class="metric">
+                            <span>⚡</span>
+                            <span class="metric-value">476</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <a href="#" target="_blank" class="post-link">Ver no Instagram →</a>
+                </div>
+            </div>
+
+            <div class="post">
+                <div class="post-info">
+                    <div>
+                        <span class="post-type">CAROUSEL_ALBUM</span>
+                        <p class="post-caption">🇧🇷 Há algo transformador quando uma mulher escolhe a montanha. Não é apenas sobre esporte, não é apenas sobre performance. É sobre presença.
+
+A presen...</p>
+                    </div>
+                    <div class="post-metrics">
+                        <div class="metric">
+                            <span>❤️</span>
+                            <span class="metric-value">458</span>
+                        </div>
+                        <div class="metric">
+                            <span>💬</span>
+                            <span class="metric-value">7</span>
+                        </div>
+                        <div class="metric">
+                            <span>⚡</span>
+                            <span class="metric-value">472</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <a href="#" target="_blank" class="post-link">Ver no Instagram →</a>
+                </div>
+            </div>
+
         </div>
-        <div class="card">
-          <div class="card-type">CAROUSEL_ALBUM</div>
-          <p class="caption">Santa Catarina acaba de ganhar dois grandes movimentos para quem ama correr!  🏃‍♂️🔥 Vem ai o Circuit…</p>
-          <div class="metrics">
-            <span>❤️ 1173</span>
-            <span>💬 37</span>
-            <span>🔖 0</span>
-            <span>👁️ 0</span>
-          </div>
-          <a href="#" target="_blank">Ver post →</a>
-        </div>
-        <div class="card">
-          <div class="card-type">CAROUSEL_ALBUM</div>
-          <p class="caption">🇺🇸 Save the date for the biggest challenge of the year.  Set aside your legs and your mind for Novem…</p>
-          <div class="metrics">
-            <span>❤️ 771</span>
-            <span>💬 54</span>
-            <span>🔖 0</span>
-            <span>👁️ 0</span>
-          </div>
-          <a href="#" target="_blank">Ver post →</a>
-        </div>
-        <div class="card">
-          <div class="card-type">CAROUSEL_ALBUM</div>
-          <p class="caption">🇧🇷 Uma subida raramente te quebra pela inclinação, ela te quebra pela história que você conta enquan…</p>
-          <div class="metrics">
-            <span>❤️ 769</span>
-            <span>💬 32</span>
-            <span>🔖 0</span>
-            <span>👁️ 0</span>
-          </div>
-          <a href="#" target="_blank">Ver post →</a>
-        </div>
-        <div class="card">
-          <div class="card-type">CAROUSEL_ALBUM</div>
-          <p class="caption">🇧🇷 INSCRIÇÕES ABERTAS com promo de verdade na Sicoob Mons Ultra Trail — A Grand Final do @onehundred…</p>
-          <div class="metrics">
-            <span>❤️ 499</span>
-            <span>💬 71</span>
-            <span>🔖 0</span>
-            <span>👁️ 0</span>
-          </div>
-          <a href="#" target="_blank">Ver post →</a>
-        </div>
-        <div class="card">
-          <div class="card-type">CAROUSEL_ALBUM</div>
-          <p class="caption">🇧🇷 Existem pessoas que nos ensinam sobre força sem precisar levantar a voz. Mães fazem isso o tempo …</p>
-          <div class="metrics">
-            <span>❤️ 528</span>
-            <span>💬 27</span>
-            <span>🔖 0</span>
-            <span>👁️ 0</span>
-          </div>
-          <a href="#" target="_blank">Ver post →</a>
-        </div>
-        <div class="card">
-          <div class="card-type">VIDEO</div>
-          <p class="caption">🇧🇷 É hora de reviver tudo o que vivemos na grande final.  É emoção à flor da pele, é o resgate de tu…</p>
-          <div class="metrics">
-            <span>❤️ 426</span>
-            <span>💬 38</span>
-            <span>🔖 0</span>
-            <span>👁️ 0</span>
-          </div>
-          <a href="#" target="_blank">Ver post →</a>
-        </div>
-        <div class="card">
-          <div class="card-type">VIDEO</div>
-          <p class="caption">🇧🇷 Toda história que será lembrada em novembro começou muito antes da largada. Começou no instante e…</p>
-          <div class="metrics">
-            <span>❤️ 362</span>
-            <span>💬 57</span>
-            <span>🔖 0</span>
-            <span>👁️ 0</span>
-          </div>
-          <a href="#" target="_blank">Ver post →</a>
-        </div>
-        <div class="card">
-          <div class="card-type">CAROUSEL_ALBUM</div>
-          <p class="caption">🇧🇷 Há algo transformador quando uma mulher escolhe a montanha. Não é apenas sobre esporte, não é ape…</p>
-          <div class="metrics">
-            <span>❤️ 458</span>
-            <span>💬 7</span>
-            <span>🔖 0</span>
-            <span>👁️ 0</span>
-          </div>
-          <a href="#" target="_blank">Ver post →</a>
-        </div></div>
-<h2>💡 Sugestões de Conteúdo</h2>
-<ul class="sug"><li>📸 Fotos lideram — use imagens de alta qualidade em pontos icônicos do percurso</li><li>🏆 Posts de resultado e pódio geram alto engajamento — publique sempre após cada prova</li><li>⏱️ Publique entre 18h-21h (horário de pico para atletas após treino)</li><li>🏷️ Use hashtags: #MonsUltraTrail #NovaTraento #TrailRunning #UltraTrail #SCTrail</li><li>🎯 Stories com contagem regressiva para inscrições aumentam conversão</li><li>❓ Faça enquetes nos Stories sobre distâncias e percursos para engajar e colher insights</li><li>📍 Marque sempre a localização Nova Trento, SC nos posts</li></ul>
-<p class="footer">Gerado por Hermes Agent • Mons Ultra Trail Analytics</p>
-</body></html>
+        
+        <footer>
+            <p>🤖 Gerado por Hermes Agent • Mons Ultra Trail Analytics</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Gráfico de tipos
+        const typesCtx = document.getElementById('typesChart').getContext('2d');
+        new Chart(typesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ["CAROUSEL_ALBUM", "VIDEO"],
+                datasets: [{
+                    data: [8, 2],
+                    backgroundColor: [
+                        '#667eea',
+                        '#764ba2',
+                        '#f093fb',
+                        '#4facfe',
+                        '#00f2fe'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        
+        // Gráfico de engajamento
+        const engagementCtx = document.getElementById('engagementChart').getContext('2d');
+        new Chart(engagementCtx, {
+            type: 'bar',
+            data: {
+                labels: ["Post 1", "Post 2", "Post 3", "Post 4", "Post 5", "Post 6", "Post 7", "Post 8", "Post 9", "Post 10"],
+                datasets: [
+                    {
+                        label: 'Likes',
+                        data: [4221, 1345, 1173, 771, 769, 499, 528, 426, 362, 458],
+                        backgroundColor: '#667eea'
+                    },
+                    {
+                        label: 'Comentários',
+                        data: [143, 42, 37, 54, 32, 71, 27, 38, 57, 7],
+                        backgroundColor: '#764ba2'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
